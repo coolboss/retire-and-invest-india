@@ -1,0 +1,735 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Retirement Runway</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: control column (money, spending, inflation, investments) beside a results column; stacks on phones with a sticky verdict bar. */
+:root{
+  --bg:#EFF3F1; --surface:#FFFFFF; --sunk:#E4EAE7; --ink:#14201C; --muted:#56635E; --line:#D3DCD8;
+  --accent:#0E6A5B; --accent-soft:#D5EBE5; --band:rgba(14,106,91,.16);
+  --good:#1D7444; --good-bg:#DDF0E3; --warn:#94600E; --warn-bg:#F6EBD3; --bad:#A8271E; --bad-bg:#F7DEDA;
+  --c1:#2a78d6; --c2:#eb6834; --c3:#1baf7a; --c4:#eda100; --c5:#e87ba4;
+  --display:"Young Serif", Georgia, "Times New Roman", serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1513; --surface:#16201D; --sunk:#111A17; --ink:#E5ECE9; --muted:#97A6A0; --line:#2A3632;
+  --accent:#55C2A8; --accent-soft:#173A32; --band:rgba(85,194,168,.18);
+  --good:#6CCB8F; --good-bg:#16301F; --warn:#E3B35A; --warn-bg:#352A14; --bad:#F08A80; --bad-bg:#3A1C19;
+  --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500; --c5:#d55181; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1513; --surface:#16201D; --sunk:#111A17; --ink:#E5ECE9; --muted:#97A6A0; --line:#2A3632;
+  --accent:#55C2A8; --accent-soft:#173A32; --band:rgba(85,194,168,.18);
+  --good:#6CCB8F; --good-bg:#16301F; --warn:#E3B35A; --warn-bg:#352A14; --bad:#F08A80; --bad-bg:#3A1C19;
+  --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500; --c5:#d55181; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:28px 48px}
+header{display:grid;gap:6px;margin-bottom:24px;max-width:70ch}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,5vw,44px);line-height:1.1;margin:0;text-wrap:balance}
+header p{margin:0;color:var(--muted)}
+h2{font-family:var(--display);font-weight:400;font-size:21px;margin:0;text-wrap:balance}
+h3{font-size:13px;margin:0;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.layout{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.col{display:grid;gap:16px;min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:14px;min-width:0}
+.panel>.head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hint{font-size:13px;color:var(--muted);margin:0}
+label{font-weight:500}
+.field{display:grid;gap:6px}
+.money-in{font-family:var(--display);font-size:26px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--sunk);color:var(--ink);width:100%}
+.money-in:focus,.small-in:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
+.small-in,select{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--sunk);color:var(--ink);width:100%}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip,.seg button{font:inherit;font-size:13px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip:hover,.seg button:hover{border-color:var(--accent)}
+.chip:focus-visible,.seg button:focus-visible,.btn:focus-visible,input[type=range]:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center}
+.row .val{font-weight:600;text-align:right;white-space:nowrap}
+.row input[type=range]{grid-column:1/-1}
+input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0}
+.parsed{font-size:13px;color:var(--accent);font-weight:600}
+.group{display:grid;gap:10px;padding-top:12px;border-top:1px solid var(--line)}
+.group:first-child{border-top:0;padding-top:0}
+.ghead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ghead .sub{font-size:12px;color:var(--muted)}
+.ghead .tot{font-weight:700}
+.total{display:flex;justify-content:space-between;align-items:baseline;padding:10px 12px;background:var(--accent-soft);border-radius:8px;font-weight:600}
+.total b{font-family:var(--display);font-weight:400;font-size:20px}
+details summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:14px}
+details[open] summary{margin-bottom:10px}
+.infl-table{width:100%;border-collapse:collapse;font-size:14px}
+.infl-table td{padding:5px 0;border-bottom:1px solid var(--line)}
+.infl-table td:last-child{text-align:right;font-weight:600}
+.check{display:flex;gap:8px;align-items:flex-start;font-weight:400}
+.check input{margin-top:4px;accent-color:var(--accent)}
+
+/* mix */
+.mixbar{display:flex;height:14px;border-radius:4px;overflow:hidden;gap:2px;background:var(--surface)}
+.mixbar span{display:block;height:100%;min-width:2px}
+.mixlist{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:14px}
+.mixlist li{display:grid;grid-template-columns:12px minmax(0,1fr) auto auto;gap:8px;align-items:center}
+.mixlist i{width:12px;height:12px;border-radius:3px;display:block}
+.mixlist .pc{font-weight:700;min-width:3.2em;text-align:right}
+.mixlist .amt{color:var(--muted);min-width:5.4em;text-align:right}
+.mixstats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.warnbox{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:10px 12px;font-size:13px;display:grid;gap:4px}
+.warnbox p{margin:0}
+.avgroup{display:grid;gap:8px;padding-top:10px;border-top:1px solid var(--line)}
+.avgroup:first-child{border-top:0;padding-top:0}
+.avgroup h3{display:flex;align-items:center;gap:6px}
+.avgroup h3 i{width:10px;height:10px;border-radius:2px;display:block}
+
+/* verdict */
+.verdict{display:grid;gap:14px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;width:max-content}
+.pill.good{background:var(--good-bg);color:var(--good)} .pill.warn{background:var(--warn-bg);color:var(--warn)} .pill.bad{background:var(--bad-bg);color:var(--bad)}
+.big{font-family:var(--display);font-size:clamp(24px,3.4vw,32px);line-height:1.2;margin:0;text-wrap:balance}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:620px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{background:var(--sunk);border-radius:8px;padding:10px 12px;display:grid;gap:2px;min-width:0}
+.stat .k{font-size:12px;color:var(--muted)}
+.stat .v{font-weight:700;font-size:18px}
+.afford{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 14px;border:1px dashed var(--accent);border-radius:8px}
+.afford p{margin:0;min-width:0;flex:1 1 260px}
+.btn{font:inherit;font-weight:600;font-size:14px;padding:8px 14px;border-radius:8px;border:0;background:var(--accent);color:var(--surface);cursor:pointer}
+
+/* chart */
+.chart-box{position:relative;min-width:0}
+#chart{display:block;width:100%;height:300px}
+#chart text{fill:var(--muted);font-size:11px;font-family:var(--body)}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.12);min-width:170px}
+.tip .t{font-weight:700;margin-bottom:4px}
+.tip div{display:flex;justify-content:space-between;gap:12px}
+.tip span{color:var(--muted)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle}
+
+/* tables */
+.scroll{overflow-x:auto}
+table.grid{border-collapse:separate;border-spacing:6px;width:100%;min-width:480px}
+table.grid th{font-size:12px;color:var(--muted);font-weight:600;text-align:left;padding:2px 4px}
+table.grid th .s{display:block;font-weight:400}
+table.grid td{border-radius:8px;padding:10px;vertical-align:top}
+table.grid td b{display:block;font-size:17px}
+table.grid td small{font-size:12px}
+td.good{background:var(--good-bg);color:var(--good)} td.warn{background:var(--warn-bg);color:var(--warn)} td.bad{background:var(--bad-bg);color:var(--bad)}
+td.mine{outline:2px solid var(--ink);outline-offset:-2px}
+table.plain{border-collapse:collapse;width:100%;min-width:460px;font-size:14px}
+table.plain th,table.plain td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right}
+table.plain th:first-child,table.plain td:first-child{text-align:left}
+table.plain th{font-size:12px;color:var(--muted);font-weight:600}
+table.plain tr.sum td{font-weight:700;border-bottom:0}
+table.av{border-collapse:collapse;width:100%;min-width:600px;font-size:14px}
+table.av th,table.av td{padding:8px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}
+table.av th{font-size:12px;color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--surface)}
+table.av th:first-child,table.av td:first-child{text-align:left}
+table.av .note{display:block;color:var(--muted);font-size:13px;font-weight:400;margin-top:2px;max-width:46ch}
+table.av td:first-child{min-width:240px}
+table.av tr.gh td{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border-bottom:0;padding-top:16px}
+table.av tr.gh i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+table.av tr.mine td{background:var(--accent-soft);font-weight:600}
+table.av .nm{font-weight:600}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;white-space:nowrap}
+.tag.good{background:var(--good-bg);color:var(--good)} .tag.warn{background:var(--warn-bg);color:var(--warn)} .tag.bad{background:var(--bad-bg);color:var(--bad)}
+.swing{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end}
+.swing b{display:inline-block;height:6px;border-radius:3px;background:var(--muted)}
+.buckets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:620px){.buckets{grid-template-columns:minmax(0,1fr)}}
+.bucket{border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:4px;align-content:start;min-width:0}
+.bucket .amt{font-family:var(--display);font-size:22px}
+.bucket .what{font-size:13px;color:var(--muted)}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px}
+.bar span{display:block;height:100%}
+.notes{font-size:13px;color:var(--muted);display:grid;gap:6px}
+.notes p{margin:0;max-width:80ch}
+
+.dock{display:none}
+@media (max-width:900px){
+  .wrap{padding-bottom:96px}
+  .dock{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:5;gap:10px;align-items:center;justify-content:space-between;background:var(--surface);border:0;border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));font:inherit;font-size:14px;color:var(--ink);text-align:left;cursor:pointer}
+  .dock b{font-weight:700}
+  .dock .go{color:var(--accent);font-weight:600;white-space:nowrap}
+  .dock:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
+}
+#verdict{scroll-margin-top:12px}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">India · retirement planner</div>
+    <h1>Retirement Runway</h1>
+    <p>How long will your savings last? Enter your money once, set your monthly spending, choose where you invest, and compare official inflation with the inflation households actually feel.</p>
+  </header>
+
+  <div class="layout">
+    <!-- INPUTS -->
+    <div class="col">
+      <section class="panel" aria-labelledby="h-money">
+        <div class="head"><h2 id="h-money">Your money</h2></div>
+        <div class="field">
+          <label for="today">Liquid savings today</label>
+          <input id="today" class="money-in" inputmode="decimal" value="3 Cr" autocomplete="off">
+          <div class="parsed" id="todayParsed"></div>
+          <p class="hint">FDs, mutual funds, shares, PPF, EPF, NPS lump sum. Leave out your home. Type “2 Cr”, “150 L” or a number.</p>
+          <div class="chips" id="chips"></div>
+        </div>
+        <div class="row"><label for="curAge">Your age now</label><span class="val" id="curAgeV"></span><input type="range" id="curAge" min="25" max="80" step="1"></div>
+        <div class="row"><label for="retAge">Retire at</label><span class="val" id="retAgeV"></span><input type="range" id="retAge" min="40" max="80" step="1"></div>
+        <div class="row"><label for="planAge">Plan until age</label><span class="val" id="planAgeV"></span><input type="range" id="planAge" min="80" max="100" step="1"></div>
+        <div id="preRet" class="field" hidden>
+          <div class="row"><label for="preR">Growth until retirement (per year)</label><span class="val" id="preRV"></span><input type="range" id="preR" min="4" max="14" step="0.5"></div>
+          <label for="retCorpus">Expected at retirement</label>
+          <input id="retCorpus" class="small-in" inputmode="decimal" autocomplete="off">
+          <p class="hint" id="retCorpusHint"></p>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-spend">
+        <div class="head"><h2 id="h-spend">Monthly spending</h2><span class="hint">in today’s ₹</span></div>
+        <div id="groups"></div>
+        <div class="total"><span>Total per month</span><b id="spendTotal"></b></div>
+        <label class="check"><input type="checkbox" id="flex"><span>After a year when markets fall, cut discretionary and travel by 25% for that year.</span></label>
+      </section>
+
+      <section class="panel" aria-labelledby="h-infl">
+        <div class="head"><h2 id="h-infl">Inflation</h2></div>
+        <div class="seg" id="inflSeg" role="group" aria-label="Inflation view">
+          <button data-m="govt">Official CPI</button>
+          <button data-m="real">Realistic</button>
+          <button data-m="stress">Stress</button>
+          <button data-m="custom">Custom</button>
+        </div>
+        <p class="hint" id="inflHint"></p>
+        <table class="infl-table" id="inflTable"></table>
+        <details><summary>Adjust each rate</summary><div id="inflSliders" class="col"></div></details>
+      </section>
+
+      <section class="panel" aria-labelledby="h-inv">
+        <div class="head"><h2 id="h-inv">Where the money sits</h2></div>
+        <div class="seg" id="presetSeg" role="group" aria-label="Ready-made plans"></div>
+        <p class="hint" id="presetHint"></p>
+        <div class="mixbar" id="mixBar" aria-hidden="true"></div>
+        <ul class="mixlist" id="mixList"></ul>
+        <div class="mixstats">
+          <div class="stat"><span class="k">Return after tax, typical year</span><span class="v" id="mxRet"></span></div>
+          <div class="stat"><span class="k">Equity share</span><span class="v" id="mxEq"></span></div>
+          <div class="stat"><span class="k">Ups and downs (yearly)</span><span class="v" id="mxSd"></span></div>
+          <div class="stat"><span class="k">Annuity pension</span><span class="v" id="mxAnn"></span></div>
+        </div>
+        <div class="warnbox" id="capWarn" hidden></div>
+        <details id="mixDetails"><summary>Change the mix</summary><div id="mixSliders" class="col"></div></details>
+        <div class="field">
+          <span id="hhLbl" style="font-weight:500">Household</span>
+          <div class="seg" id="hhSeg" role="group" aria-labelledby="hhLbl"><button data-h="1">Single</button><button data-h="2">Couple</button></div>
+          <p class="hint">A couple gets two SCSS limits, a joint POMIS limit, and two ₹1.25 L capital-gains exemptions.</p>
+        </div>
+        <div class="field">
+          <label for="slab">Tax slab on interest income</label>
+          <select id="slab">
+            <option value="0">0% · taxable income under ₹12 L (new regime)</option>
+            <option value="15">15% · ₹12–16 L</option>
+            <option value="20">20% · ₹16–20 L</option>
+            <option value="25">25% · ₹20–24 L</option>
+            <option value="30">30% · above ₹24 L</option>
+          </select>
+          <p class="hint">Split between spouses, many retired couples stay under ₹12 L each and pay no tax on interest.</p>
+        </div>
+        <details><summary>Market return assumptions</summary>
+          <div class="col">
+            <div class="row"><label for="EQ">Indian equity, long-run, before tax</label><span class="val" id="EQV"></span><input type="range" id="EQ" min="8" max="14" step="0.5"></div>
+            <div class="row"><label for="GD">Gold in rupees, long-run</label><span class="val" id="GDV"></span><input type="range" id="GD" min="5" max="12" step="0.5"></div>
+            <p class="hint">Nifty 50 has returned about 11–12% a year over 20 years. Gold in rupees has returned about 9–10%. Fund returns below are built from these, minus fund costs.</p>
+          </div>
+        </details>
+      </section>
+
+      <section class="panel" aria-labelledby="h-inc">
+        <div class="head"><h2 id="h-inc">Other income</h2><span class="hint">optional</span></div>
+        <div class="row"><label for="pension">Pension or rent (₹/month at retirement)</label><span class="val" id="pensionV"></span><input type="range" id="pension" min="0" max="200000" step="1000"></div>
+        <div class="row"><label for="pensionG">Grows each year by</label><span class="val" id="pensionGV"></span><input type="range" id="pensionG" min="0" max="8" step="0.5"></div>
+      </section>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="col">
+      <section class="panel verdict" id="verdict" aria-live="polite">
+        <span class="pill" id="pill"></span>
+        <p class="big" id="bigLine"></p>
+        <div class="stats">
+          <div class="stat"><span class="k" id="kChance"></span><span class="v" id="vChance"></span></div>
+          <div class="stat"><span class="k">Bad market (1 in 10)</span><span class="v" id="vBad"></span></div>
+          <div class="stat"><span class="k">First-year withdrawal</span><span class="v" id="vWr"></span></div>
+          <div class="stat"><span class="k">Corpus at retirement</span><span class="v" id="vCorpus"></span></div>
+        </div>
+        <div class="afford">
+          <p id="affordText"></p>
+          <button class="btn" id="applyAfford" type="button">Set my spending to this</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="head"><h2>Your corpus, year by year</h2>
+          <div class="seg" id="viewSeg" role="group" aria-label="Rupee view"><button data-v="real">Today’s ₹</button><button data-v="nom">Actual ₹</button></div>
+        </div>
+        <div class="chart-box" id="chartBox">
+          <svg id="chart" role="img" aria-label="Projected corpus by age"></svg>
+          <div class="tip" id="tip" hidden></div>
+        </div>
+        <div class="legend"><span><i style="background:var(--accent)"></i>Typical market (median of 1,000 runs)</span><span><i style="background:var(--band)"></i>Range from bad to good markets (10th–90th percentile)</span></div>
+      </section>
+
+      <section class="panel">
+        <div class="head"><h2>Every investment avenue, compared</h2><span class="hint">If all your money went into one</span></div>
+        <div class="scroll"><table class="av" id="avTable"></table></div>
+        <p class="hint">Uses your spending, inflation view, tax slab and household. Each row runs 200 market paths. “Above limit” means the scheme cannot hold your whole corpus; the row shows what would happen if it could.</p>
+      </section>
+
+      <section class="panel">
+        <div class="head"><h2>Every scenario</h2><span class="hint">Age when money runs out, with your mix</span></div>
+        <div class="scroll"><table class="grid" id="scen"></table></div>
+        <p class="hint">Steady returns every year. Outlined cell is your current setting. Real markets are bumpier, which is why the 1,000-run figures above are lower.</p>
+      </section>
+
+      <section class="panel">
+        <div class="head"><h2>What your spending becomes</h2><span class="hint">₹ per month, in actual rupees of that year</span></div>
+        <div class="scroll"><table class="plain" id="spendTable"></table></div>
+        <p class="hint" id="healthNote"></p>
+      </section>
+
+      <section class="panel">
+        <div class="head"><h2>How to hold the money</h2><span class="hint">three-bucket plan</span></div>
+        <div class="bar" id="bucketBar" aria-hidden="true"></div>
+        <div class="buckets" id="buckets"></div>
+        <p class="hint" id="bucketNote"></p>
+      </section>
+
+      <section class="panel notes">
+        <h3>Assumptions</h3>
+        <p><b>Official CPI</b> has averaged about 5% over the last decade and printed far lower in 2025. It tracks a national basket heavy in food. A retired urban household spends more on health, help, services and travel, which rise faster. <b>Realistic</b> uses 6.5% for essentials, 11% for health, 7% for discretionary and occasional costs, 8% for travel. <b>Stress</b> adds about 1.5% to each.</p>
+        <p><b>Rates used (Oct–Dec 2026):</b> SCSS 8.2%, Post Office MIS 7.4%, PPF 7.1%, RBI Floating Rate Bonds 8.05%, senior-citizen FDs about 7% at large banks and 8–8.5% at small finance banks. Annuity rates are approximate for age 60 and rise slightly with age; get an insurer’s quote before buying.</p>
+        <p><b>Tax:</b> FD, SCSS, POMIS, RBI bonds and annuities are taxed at your slab every year. Debt funds and funds under 35% equity are taxed at slab, but only when you redeem. Equity funds (65%+ equity) pay 12.5% on long-term gains above ₹1.25 L a year per person. Funds with 35–65% equity, which includes many multi-asset funds, pay 12.5% after two years. Gold ETFs pay 12.5% after one year. The tool turns these into an approximate yearly tax drag.</p>
+        <p><b>Ups and downs:</b> equity swings about 17% a year, gold about 15%, bonds 2–3%, with equity and gold moving independently. That is why a multi-asset fund with some gold has smaller falls than a balanced fund with the same return. The mix is rebalanced once a year.</p>
+        <p>This is a planning aid, not financial advice. Rates change every quarter. Review it every year with your actual numbers.</p>
+      </section>
+    </div>
+  </div>
+</div>
+
+<button class="dock" id="dock" type="button" aria-label="Jump to results"><span id="dockL"></span><b id="dockR"></b><span class="go">Results ↑</span></button>
+
+<script>
+(function(){
+const GROUPS=[
+ {id:'ess',name:'Essentials',sub:'Must pay every month',items:[
+  {id:'groc',label:'Groceries & household',u:'m',d:15000,max:60000,st:500},
+  {id:'house',label:'Housing: rent, society, property tax',u:'m',d:5000,max:80000,st:500},
+  {id:'util',label:'Electricity, gas, water, phone, internet',u:'m',d:6000,max:25000,st:500},
+  {id:'trans',label:'Transport: fuel, servicing, cabs',u:'m',d:6000,max:30000,st:500},
+  {id:'help',label:'Domestic help & driver',u:'m',d:8000,max:60000,st:500}]},
+ {id:'health',name:'Health',sub:'Rises fastest after 60',items:[
+  {id:'ins',label:'Health insurance premium (per year)',u:'y',d:80000,max:500000,st:5000},
+  {id:'med',label:'Medicines, tests, consultations',u:'m',d:4000,max:50000,st:500}]},
+ {id:'disc',name:'Discretionary',sub:'Can be cut in a bad year',items:[
+  {id:'dine',label:'Eating out & entertainment',u:'m',d:5000,max:40000,st:500},
+  {id:'cloth',label:'Clothes & personal care',u:'m',d:3000,max:30000,st:500},
+  {id:'gift',label:'Gifts, festivals, social, donations',u:'m',d:4000,max:50000,st:500},
+  {id:'hobby',label:'Hobbies & subscriptions',u:'m',d:2000,max:20000,st:500}]},
+ {id:'travel',name:'Travel',sub:'Airfares and hotels outpace CPI',items:[
+  {id:'trav',label:'Holidays & visiting family (per year)',u:'y',d:150000,max:2000000,st:10000}]},
+ {id:'lumpy',name:'Occasional big costs',sub:'Averaged per year',items:[
+  {id:'car',label:'Car replacement, set aside (per year)',u:'y',d:100000,max:600000,st:10000},
+  {id:'repair',label:'Home repairs & appliances (per year)',u:'y',d:50000,max:400000,st:5000},
+  {id:'family',label:'Support to children & grandchildren (per year)',u:'y',d:0,max:2000000,st:10000}]}
+];
+const GIDS=GROUPS.map(g=>g.id);
+const PRESETS={govt:{ess:5,health:5,disc:5,travel:5,lumpy:5},real:{ess:6.5,health:11,disc:7,travel:8,lumpy:7},stress:{ess:8,health:13,disc:8.5,travel:9.5,lumpy:8.5}};
+const HINTS={govt:'What the government reports: one rate, about 5%, for everything.',real:'What a retired urban household usually sees. Health rises fastest.',stress:'A harsh but possible decade: high food prices, costly hospital years.',custom:'Your own rates, set below.'};
+
+/* ---- investment avenues ---- */
+const AVG=[{id:'fixed',name:'Fixed income & small savings',c:'var(--c1)'},{id:'debt',name:'Debt & arbitrage funds',c:'var(--c2)'},{id:'hyb',name:'Hybrid funds',c:'var(--c3)'},{id:'growth',name:'Equity, gold, REITs',c:'var(--c4)'},{id:'ann',name:'Annuity (pension for life)',c:'var(--c5)'}];
+const AV=[
+ {id:'liquid',g:'fixed',name:'Liquid fund / sweep FD',fixed:6.0,dv:.005,tax:'slab',note:'Withdraw any working day. Home for bucket 1.'},
+ {id:'fd',g:'fixed',name:'Bank FD, senior-citizen rate',fixed:7.0,dv:.006,tax:'slab',note:'About 6.75–7.1% at large banks. DICGC insures ₹5 L per bank.'},
+ {id:'sfb',g:'fixed',name:'Small finance bank FD',fixed:8.25,dv:.006,tax:'slab',cap:'sfb',note:'8–8.5%. Keep within ₹5 L per bank for DICGC cover.'},
+ {id:'scss',g:'fixed',name:'Senior Citizens Savings Scheme',fixed:8.2,dv:.004,tax:'slab',cap:'scss',note:'8.2%, paid quarterly. ₹30 L limit per person, 5-year term.'},
+ {id:'pomis',g:'fixed',name:'Post Office Monthly Income',fixed:7.4,dv:.004,tax:'slab',cap:'pomis',note:'7.4%, paid monthly. Limit ₹9 L single, ₹15 L joint.'},
+ {id:'rbi',g:'fixed',name:'RBI Floating Rate Bonds',fixed:8.05,dv:.004,tax:'slab',note:'8.05% now, reset every 6 months. 7-year lock-in, earlier exit for 60+.'},
+ {id:'ppf',g:'fixed',name:'PPF (existing account)',fixed:7.1,dv:.003,tax:'free',cap:'ppf',note:'Tax-free. Only ₹1.5 L a year can go in, so mainly an existing balance.'},
+ {id:'tfb',g:'fixed',name:'Tax-free bonds (bought on exchange)',fixed:5.6,dv:.004,tax:'free',note:'Tax-free, about 5.5–6% yield. Limited supply, thin trading.'},
+ {id:'corp',g:'fixed',name:'AAA corporate bonds',fixed:7.6,dv:.012,tax:'slab',note:'A little credit risk. Interest at slab.'},
+ {id:'debtf',g:'debt',name:'Short-duration debt fund',mk:{e:0,g:0,dy:7.3,c:.4},dv:.025,tax:'debtfund',note:'Taxed at slab, but only when you redeem.'},
+ {id:'arb',g:'debt',name:'Arbitrage fund',mk:{e:0,g:0,dy:6.7,c:.4},dv:.008,tax:'eq',note:'FD-like return with equity taxation.'},
+ {id:'cons',g:'hyb',name:'Conservative hybrid (10–25% equity)',mk:{e:.2,g:0,dy:7.3,c:.7},dv:.025,tax:'debtfund',note:'Under 35% equity, so taxed at slab.'},
+ {id:'eqsav',g:'hyb',name:'Equity savings fund',mk:{e:.3,g:0,dy:6.6,c:.6},dv:.015,tax:'eq',note:'About 30% net equity, rest arbitrage and debt. Equity tax.'},
+ {id:'baf',g:'hyb',name:'Balanced advantage (dynamic)',mk:{e:.5,g:0,dy:6.8,c:.6},dv:.02,tax:'eq',note:'Moves equity between 30% and 80% by valuation.'},
+ {id:'multi',g:'hyb',name:'Multi-asset allocation fund',mk:{e:.55,g:.15,dy:7.0,c:.6},dv:.02,tax:'mid',note:'Equity, debt and gold in one fund. Gold cushions equity falls.'},
+ {id:'aggr',g:'hyb',name:'Aggressive hybrid (balanced fund)',mk:{e:.75,g:0,dy:7.0,c:.6},dv:.02,tax:'eq',note:'65–80% equity, the rest in debt.'},
+ {id:'index',g:'growth',name:'Equity index or flexi-cap fund',mk:{e:1,g:0,dy:0,c:.25},dv:0,tax:'eq',note:'Full equity swings. For money you will not touch for 8+ years.'},
+ {id:'gold',g:'growth',name:'Gold ETF or gold fund',mk:{e:0,g:1,dy:0,c:.4},dv:0,tax:'gold',note:'Often rises when equity falls. 12.5% tax after one year.'},
+ {id:'reit',g:'growth',name:'REITs and InvITs',fixed:8.5,e:.45,dv:.03,tax:'reit',note:'Rent-like payouts, partly taxable. Prices swing with markets.'},
+ {id:'annJ',g:'ann',name:'Annuity: joint life, no refund',ann:{base:7.9,step:.1},tax:'slab',note:'Fixed pension while either spouse lives. Never rises with inflation.'},
+ {id:'annR',g:'ann',name:'Annuity: return of purchase price',ann:{base:6.4,step:.03},tax:'slab',note:'Lower pension; the capital goes to heirs.'}
+];
+const AVID={};AV.forEach(a=>AVID[a.id]=a);
+const PLANS=[
+ {id:'bucket',label:'Three buckets',hint:'Liquid fund for 1–2 years, SCSS and RBI bonds for stability, index fund for growth, a little gold.'},
+ {id:'multi',label:'Multi-asset fund',hint:'Everything in one multi-asset allocation fund (about 55% equity, 15% gold, 30% debt).'},
+ {id:'aggr',label:'Balanced fund',hint:'Everything in an aggressive hybrid fund (65–80% equity).'},
+ {id:'baf',label:'Balanced advantage',hint:'Everything in a dynamic asset allocation fund.'},
+ {id:'safe',label:'Guaranteed only',hint:'SCSS and POMIS up to their limits, then RBI bonds and bank FDs. No market risk, full slab tax.'},
+ {id:'fd',label:'Bank FD only',hint:'Everything in senior-citizen bank FDs.'},
+ {id:'annuity',label:'Annuity + funds',hint:'30% buys a joint-life pension; the rest goes into a multi-asset fund, SCSS and a liquid fund.'},
+ {id:'idx',label:'Index 60 / debt 40',hint:'60% equity index fund, 30% debt fund, 10% liquid fund.'},
+ {id:'custom',label:'Custom',hint:'Your own mix, set under “Change the mix”.'}
+];
+const RETS={poor:{e:-2,g:-1,label:'Weak markets',s:'Equity 2% lower, gold 1% lower'},base:{e:0,g:0,label:'Normal markets',s:'Your return assumptions'},good:{e:2,g:1,label:'Strong markets',s:'Equity 2% higher, gold 1% higher'}};
+
+const def={todayTxt:'3 Cr',curAge:60,retAge:60,planAge:90,preR:9,retTxt:'',exp:{},inflMode:'real',infl:{...PRESETS.real},plan:'bucket',mix:{},hh:2,slab:15,EQ:11.5,GD:9,pension:0,pensionG:0,flex:false,view:'real'};
+GROUPS.forEach(g=>g.items.forEach(i=>def.exp[i.id]=i.d));
+let S=JSON.parse(JSON.stringify(def));
+try{const sv=JSON.parse(localStorage.getItem('runway-v2')||'null');if(sv){S={...S,...sv,exp:{...S.exp,...(sv.exp||{})},infl:{...S.infl,...(sv.infl||{})},mix:{...(sv.mix||{})}};}}catch(e){}
+const save=()=>{try{localStorage.setItem('runway-v2',JSON.stringify(S))}catch(e){}};
+
+const $=id=>document.getElementById(id);
+function inr(n){const a=Math.abs(n),s=n<0?'−':'';
+ if(a>=1e7)return s+'₹'+(a/1e7).toFixed(a>=1e9?0:2)+' Cr';
+ if(a>=1e5)return s+'₹'+(a/1e5).toFixed(1)+' L';
+ return s+'₹'+Math.round(a).toLocaleString('en-IN');}
+const inrFull=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const inrAxis=n=>n>=1e7?'₹'+(+(n/1e7).toFixed(2))+' Cr':n>=1e5?'₹'+(+(n/1e5).toFixed(1))+' L':inrFull(n);
+function parseMoney(t){
+ if(!t)return null;t=String(t).toLowerCase().replace(/[₹,\s]/g,'');
+ const m=t.match(/^([0-9]*\.?[0-9]+)(cr|crore|crores|c|l|lakh|lakhs|lac|lacs|k)?$/);if(!m)return null;
+ let v=parseFloat(m[1]);const u=m[2]||'';
+ if(u.startsWith('c'))v*=1e7;else if(u.startsWith('l'))v*=1e5;else if(u==='k')v*=1e3;
+ return v>0?v:null;}
+
+/* ---------- build controls ---------- */
+[['50 L'],['1 Cr'],['2 Cr'],['3 Cr'],['5 Cr'],['10 Cr']].forEach(([t])=>{
+ const b=document.createElement('button');b.className='chip';b.type='button';b.textContent=t;
+ b.onclick=()=>{$('today').value=t;S.todayTxt=t;update();};$('chips').appendChild(b);});
+
+GROUPS.forEach(g=>{
+ const d=document.createElement('div');d.className='group';
+ d.innerHTML=`<div class="ghead"><div><h3>${g.name}</h3><div class="sub">${g.sub}</div></div><span class="tot" id="gt-${g.id}"></span></div>`;
+ g.items.forEach(i=>{
+  const r=document.createElement('div');r.className='row';
+  r.innerHTML=`<label for="e-${i.id}">${i.label}</label><span class="val" id="ev-${i.id}"></span><input type="range" id="e-${i.id}" min="0" max="${i.max}" step="${i.st}">`;
+  d.appendChild(r);
+  r.querySelector('input').addEventListener('input',e=>{S.exp[i.id]=+e.target.value;update();});
+ });
+ $('groups').appendChild(d);
+});
+GROUPS.forEach(g=>{
+ const r=document.createElement('div');r.className='row';
+ r.innerHTML=`<label for="i-${g.id}">${g.name}</label><span class="val" id="iv-${g.id}"></span><input type="range" id="i-${g.id}" min="2" max="16" step="0.5">`;
+ $('inflSliders').appendChild(r);
+ r.querySelector('input').addEventListener('input',e=>{S.infl[g.id]=+e.target.value;S.inflMode='custom';update();});
+});
+document.querySelectorAll('#inflSeg button').forEach(b=>b.addEventListener('click',()=>{const m=b.dataset.m;S.inflMode=m;if(PRESETS[m])S.infl={...PRESETS[m]};update();}));
+document.querySelectorAll('#viewSeg button').forEach(b=>b.addEventListener('click',()=>{S.view=b.dataset.v;update();}));
+document.querySelectorAll('#hhSeg button').forEach(b=>b.addEventListener('click',()=>{S.hh=+b.dataset.h;if(S.plan!=='custom')S.mix=planWeights(S.plan);update();}));
+$('slab').value=S.slab;$('slab').addEventListener('change',e=>{S.slab=+e.target.value;update();});
+
+PLANS.forEach(p=>{const b=document.createElement('button');b.type='button';b.dataset.p=p.id;b.textContent=p.label;
+ b.addEventListener('click',()=>{S.plan=p.id;if(p.id!=='custom')S.mix=planWeights(p.id);else $('mixDetails').open=true;update();});$('presetSeg').appendChild(b);});
+AVG.forEach(gr=>{
+ const d=document.createElement('div');d.className='avgroup';
+ d.innerHTML=`<h3><i style="background:${gr.c}"></i>${gr.name}</h3>`;
+ AV.filter(a=>a.g===gr.id).forEach(a=>{
+  const r=document.createElement('div');r.className='row';
+  r.innerHTML=`<label for="m-${a.id}">${a.name}</label><span class="val" id="mv-${a.id}"></span><input type="range" id="m-${a.id}" min="0" max="100" step="5">`;
+  d.appendChild(r);
+  r.querySelector('input').addEventListener('input',e=>{S.mix[a.id]=+e.target.value;S.plan='custom';update();});
+ });
+ $('mixSliders').appendChild(d);
+});
+const hint=document.createElement('p');hint.className='hint';hint.textContent='Sliders set relative weights; the mix always adds up to 100%.';$('mixSliders').prepend(hint);
+
+const simple=['curAge','retAge','planAge','preR','EQ','GD','pension','pensionG'];
+simple.forEach(k=>{const el=$(k);el.addEventListener('input',()=>{
+ S[k]=+el.value;
+ if(k==='curAge'&&S.retAge<S.curAge)S.retAge=S.curAge;
+ if(k==='retAge'&&S.retAge<S.curAge)S.curAge=S.retAge;
+ if(S.planAge<=S.retAge)S.planAge=Math.min(100,S.retAge+1);
+ if((k==='curAge'||k==='retAge'||k==='preR')&&S.plan!=='custom')S.mix=planWeights(S.plan);
+ update();});});
+$('today').value=S.todayTxt;$('today').addEventListener('input',e=>{S.todayTxt=e.target.value;if(S.plan!=='custom')S.mix=planWeights(S.plan);update();});
+$('retCorpus').value=S.retTxt;$('retCorpus').addEventListener('input',e=>{S.retTxt=e.target.value;if(S.plan!=='custom')S.mix=planWeights(S.plan);update();});
+$('flex').checked=S.flex;$('flex').addEventListener('change',e=>{S.flex=e.target.checked;update();});
+
+/* ---------- money & mix model ---------- */
+function corpusAtRet(){const yrs=Math.max(0,S.retAge-S.curAge);const today=parseMoney(S.todayTxt)||0;const auto=today*Math.pow(1+S.preR/100,yrs);const over=yrs>0?parseMoney(S.retTxt):null;return {yrs,today,auto,C:over||auto};}
+function caps(){return {scss:3e6*S.hh,pomis:S.hh===2?1.5e6:9e5};}
+function planWeights(id){
+ const C=corpusAtRet().C||2e7,cp=caps();const pc=v=>Math.min(100,v/C*100);
+ switch(id){
+  case 'bucket':{const sc=Math.min(20,pc(cp.scss));return {liquid:10,scss:sc,rbi:35-sc,index:50,gold:5};}
+  case 'multi':return {multi:100};
+  case 'aggr':return {aggr:100};
+  case 'baf':return {baf:100};
+  case 'fd':return {fd:100};
+  case 'safe':{const sc=pc(cp.scss),po=Math.min(100-sc,pc(cp.pomis)),rest=100-sc-po;return {scss:sc,pomis:po,rbi:rest*.6,fd:rest*.4};}
+  case 'annuity':{const sc=Math.min(10,pc(cp.scss));return {annJ:30,multi:50,scss:sc,liquid:20-sc};}
+  case 'idx':return {index:60,debtf:30,liquid:10};
+ }
+ return {...S.mix};
+}
+if(!Object.keys(S.mix).length)S.mix=planWeights(S.plan);
+function eqTax(){return S.hh===2?.045:.06;}
+function taxFrac(a){const s=S.slab/100;switch(a.tax){case 'slab':return s;case 'debtfund':return s*.85;case 'eq':return eqTax();case 'mid':return eqTax()+.01;case 'gold':return eqTax()+.01;case 'free':return 0;case 'reit':return .5*s+.02;}return 0;}
+function annRate(a){return (a.ann.base+a.ann.step*(Math.max(S.retAge,50)-60))/100;}
+function avPre(a,adj){
+ if(a.mk)return a.mk.e*(S.EQ+adj.e)+a.mk.g*(S.GD+adj.g)+(1-a.mk.e-a.mk.g)*a.mk.dy-a.mk.c;
+ return a.fixed+(a.e||0)*adj.e;}
+function mixStats(w,adj){
+ adj=adj||{e:0,g:0};let tot=0;for(const k in w)tot+=Math.max(0,w[k]||0);
+ const R={M:0,LE:0,LG:0,LD:0,eq:0,gold:0,annFrac:0,annPer:0,preM:0,sd:0};
+ if(!tot)return R;
+ let inv=0;
+ for(const k in w){const a=AVID[k],f=Math.max(0,w[k]||0)/tot;if(!a||!f)continue;
+  const t=taxFrac(a);
+  if(a.ann){R.annFrac+=f;R.annPer+=f*annRate(a)*(1-t);continue;}
+  inv+=f;const e=a.mk?a.mk.e:(a.e||0),g=a.mk?a.mk.g:0,d=a.mk?(1-e-g)*a.dv:a.dv;
+  R.M+=f*avPre(a,adj)/100*(1-t);R.preM+=f*avPre(a,adj)/100;R.LE+=f*e*(1-t);R.LG+=f*g*(1-t);R.LD+=f*d*(1-t);R.eq+=f*e;R.gold+=f*g;}
+ if(inv>0){['M','LE','LG','LD','preM','eq','gold'].forEach(k=>R[k]/=inv);}
+ R.sd=Math.sqrt(Math.pow(R.LE*.17,2)+Math.pow(R.LG*.15,2)+R.LD*R.LD);
+ return R;
+}
+function annualToday(gid){let s=0;GROUPS.find(g=>g.id===gid).items.forEach(i=>s+=i.u==='m'?S.exp[i.id]*12:S.exp[i.id]);return s;}
+function params(scale,infl,w,adj){
+ infl=infl||S.infl;w=w||S.mix;const c=corpusAtRet();const R=mixStats(w,adj);
+ const exp={},inf={};
+ GIDS.forEach(g=>{inf[g]=infl[g]/100;exp[g]=annualToday(g)*scale*Math.pow(1+inf[g],c.yrs);});
+ return {yrs:c.yrs,today:c.today,auto:c.auto,C:c.C,corpus:c.C*(1-R.annFrac),ann:c.C*R.annPer,R,exp,inf,retAge:S.retAge,income:S.pension*12,incG:S.pensionG/100,flex:S.flex};
+}
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+function gaussFn(r){let sp=null;return function(){if(sp!==null){const v=sp;sp=null;return v;}let u,v,s;do{u=2*r()-1;v=2*r()-1;s=u*u+v*v;}while(s>=1||s===0);const m=Math.sqrt(-2*Math.log(s)/s);sp=v*m;return u*m;}}
+function run(P,gauss,keep){
+ const R=P.R;let C=P.corpus,dep=null,prev=.1;const fac={};GIDS.forEach(g=>fac[g]=1);
+ const n=100-P.retAge+1,path=keep?new Array(n):null,spend=keep?new Array(n):null;
+ for(let y=0;y<n;y++){
+  const age=P.retAge+y;if(keep)path[y]=C;
+  const shock=gauss?gauss()*.012:0;let ex=0;
+  for(const g of GIDS){let e=P.exp[g]*fac[g];if(P.flex&&prev<0&&(g==='disc'||g==='travel'))e*=.75;ex+=e;fac[g]*=1+P.inf[g]+shock;}
+  if(keep)spend[y]=ex;
+  const need=Math.max(0,ex-P.income*Math.pow(1+P.incG,y)-P.ann);
+  if(dep===null){if(C<need){dep=age+(need>0?C/need:0);C=0;}else C-=need;}
+  const r=R.M+(gauss?R.LE*.17*gauss()+R.LG*.15*gauss()+R.LD*gauss():0);
+  C*=1+r;prev=r;
+ }
+ return {dep,path,spend};
+}
+function monte(P,N,keep){
+ const g=gaussFn(mulberry(20261006));const deps=[],paths=[];
+ for(let i=0;i<N;i++){const o=run(P,g,keep);deps.push(o.dep);if(keep)paths.push(o.path);}
+ return {ok:deps.filter(d=>d===null||d>=S.planAge+1).length/N,deps,paths};
+}
+function pct(arr,p){const a=[...arr].sort((x,y)=>x-y);const i=(a.length-1)*p,lo=Math.floor(i),hi=Math.ceil(i);return a[lo]+(a[hi]-a[lo])*(i-lo);}
+const dA=d=>d===null?101:d;
+
+/* ---------- render ---------- */
+let lastMC=null,lastP=null,lastDet=null;
+function update(){
+ simple.forEach(k=>$(k).value=S[k]);
+ $('curAgeV').textContent=S.curAge;$('retAgeV').textContent=S.retAge;$('planAgeV').textContent=S.planAge;
+ $('preRV').textContent=S.preR+'%';$('EQV').textContent=S.EQ+'%';$('GDV').textContent=S.GD+'%';
+ $('pensionV').textContent=S.pension?inrFull(S.pension):'None';$('pensionGV').textContent=S.pensionG+'%';
+ $('slab').value=S.slab;
+ document.querySelectorAll('#inflSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===S.inflMode));
+ document.querySelectorAll('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===S.view));
+ document.querySelectorAll('#hhSeg button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.h===S.hh));
+ document.querySelectorAll('#presetSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p===S.plan));
+ $('presetHint').textContent=PLANS.find(p=>p.id===S.plan).hint;
+ $('inflHint').textContent=HINTS[S.inflMode];
+ GROUPS.forEach(g=>{$('i-'+g.id).value=S.infl[g.id];$('iv-'+g.id).textContent=S.infl[g.id]+'%';});
+ $('inflTable').innerHTML=GROUPS.map(g=>`<tr><td>${g.name}</td><td>${S.infl[g.id]}% a year</td></tr>`).join('');
+ let mTot=0;
+ GROUPS.forEach(g=>{let t=0;g.items.forEach(i=>{const v=S.exp[i.id];$('e-'+i.id).value=v;$('ev-'+i.id).textContent=inrFull(v)+(i.u==='y'?'/yr':'');t+=i.u==='m'?v:v/12;});$('gt-'+g.id).textContent=inrFull(t)+'/mo';mTot+=t;});
+ $('spendTotal').textContent=inrFull(mTot);
+
+ const P=params(1);lastP=P;
+ const tv=parseMoney(S.todayTxt);
+ $('todayParsed').textContent=tv?inrFull(tv)+'  ·  '+inr(tv):'Type an amount like 2 Cr, 150 L or 20000000';
+ $('preRet').hidden=P.yrs===0;
+ $('retCorpus').placeholder='Auto: '+inr(P.auto);
+ $('retCorpusHint').textContent=P.yrs>0?`${P.yrs} years away. Leave blank to use ${inr(P.auto)}, your savings grown at ${S.preR}% with no new additions.`:'';
+ drawMix(P);
+
+ if(!P.C){['bigLine','vChance','vBad','vWr','vCorpus','affordText'].forEach(id=>$(id).textContent='—');$('pill').textContent='Enter your savings';$('pill').className='pill warn';
+  ['chart','scen','spendTable','buckets','bucketBar','avTable'].forEach(id=>$(id).innerHTML='');$('dockL').textContent='Enter your savings';$('dockR').textContent='';stage2Tok++;save();return;}
+
+ const mc=monte(P,1000,true);lastMC=mc;
+ const medDep=pct(mc.deps.map(dA),.5),badDep=pct(mc.deps.map(dA),.1);
+ const det=run(P,null,true);lastDet=det;
+ const ok=mc.ok,st=ok>=.85?['good','✓ On track']:ok>=.6?['warn','! Tight']:['bad','✕ At risk'];
+ $('pill').className='pill '+st[0];$('pill').textContent=st[1];
+ $('bigLine').textContent=medDep>100?'In a typical market your money outlasts you, beyond age 100.':`In a typical market your money lasts until about age ${Math.floor(medDep)}.`;
+ $('kChance').textContent=`Chance it lasts to ${S.planAge}`;$('vChance').textContent=Math.round(ok*100)+'%';
+ $('vBad').textContent=badDep>100?'Lasts past 100':'Runs out at '+Math.floor(badDep);
+ const need1=Math.max(0,GIDS.reduce((s,g)=>s+P.exp[g],0)-P.income-P.ann);
+ const wr=P.corpus>0?need1/P.corpus*100:null;
+ $('vWr').textContent=wr===null?'—':wr.toFixed(1)+'%';$('vWr').style.color=wr>5?'var(--bad)':wr>4?'var(--warn)':'';
+ $('vCorpus').textContent=inr(P.C);
+
+ $('dockL').textContent=`Typical: lasts to ${medDep>100?'100+':Math.floor(medDep)}`;
+ $('dockR').textContent=`${Math.round(ok*100)}% chance to ${S.planAge}`;
+
+ drawChart(P,mc,det);drawScen();drawSpend(P);drawBuckets(P,need1);
+ save();
+
+ /* stage 2: the slow parts, after the verdict has painted */
+ const tok=++stage2Tok;S._scale=null;
+ $('affordText').textContent='Working out what you can afford…';$('applyAfford').hidden=true;
+ setTimeout(()=>{if(tok!==stage2Tok)return;
+  let lo=0,hi=3;for(let k=0;k<12;k++){const m=(lo+hi)/2;if(monte(params(m),200,false).ok>=.85)lo=m;else hi=m;}
+  const affordM=mTot*lo;S._scale=lo;const diff=affordM-mTot;
+  $('affordText').innerHTML=`For an 85% chance of lasting to ${S.planAge} with this mix, spend up to <b>${inrFull(Math.floor(affordM/500)*500)}/month</b> in today’s money. ${Math.abs(diff)<1000?'That is about what you plan.':diff>0?`You have room for ${inrFull(Math.floor(diff/500)*500)} more.`:`That is ${inrFull(Math.ceil(-diff/500)*500)} less than you plan.`}`;
+  $('applyAfford').hidden=Math.abs(diff)<1000;
+  drawAvenues(P,mc);save();
+ },0);
+}
+let stage2Tok=0;
+$('applyAfford').addEventListener('click',()=>{const s=S._scale;if(s==null)return;
+ GROUPS.forEach(g=>g.items.forEach(i=>{S.exp[i.id]=Math.max(0,Math.round(S.exp[i.id]*s/i.st)*i.st);}));update();});
+
+function drawMix(P){
+ const R=P.R;let tot=0;for(const k in S.mix)tot+=Math.max(0,S.mix[k]||0);
+ const items=AV.filter(a=>(S.mix[a.id]||0)>0).map(a=>({a,f:tot?S.mix[a.id]/tot:0}));
+ const col=a=>AVG.find(g=>g.id===a.g).c;
+ $('mixBar').innerHTML=items.map(it=>`<span style="flex:${it.f};background:${col(it.a)}" title="${it.a.name}"></span>`).join('');
+ $('mixList').innerHTML=items.length?items.map(it=>`<li><i style="background:${col(it.a)}"></i><span>${it.a.name}</span><span class="pc">${Math.round(it.f*100)}%</span><span class="amt">${P.C?inr(it.f*P.C):''}</span></li>`).join(''):'<li><span></span><span>Nothing selected. Pick a plan or move a slider.</span></li>';
+ AV.forEach(a=>{$('m-'+a.id).value=Math.round(S.mix[a.id]||0);$('mv-'+a.id).textContent=tot&&S.mix[a.id]?Math.round(S.mix[a.id]/tot*100)+'%':'0%';});
+ $('mxRet').textContent=R.annFrac>=1?'—':(R.M*100).toFixed(1)+'%';
+ $('mxEq').textContent=Math.round(R.eq*(1-R.annFrac)*100)+'%'+(R.gold>0?` · gold ${Math.round(R.gold*(1-R.annFrac)*100)}%`:'');
+ $('mxSd').textContent=R.annFrac>=1?'None':'±'+(R.sd*100).toFixed(1)+'%';
+ $('mxAnn').textContent=P.ann?inrFull(P.ann/12)+'/mo':'None';
+ // limits
+ const cp=caps(),w=[];
+ const amt=id=>tot?(S.mix[id]||0)/tot*P.C:0;
+ if(amt('scss')>cp.scss+1)w.push(`SCSS allows ${inr(cp.scss)} for your household; your mix puts ${inr(amt('scss'))} there.`);
+ if(amt('pomis')>cp.pomis+1)w.push(`Post Office MIS allows ${inr(cp.pomis)}; your mix puts ${inr(amt('pomis'))} there.`);
+ if(amt('ppf')>0)w.push(`PPF: only an existing balance works here, since new deposits are capped at ₹1.5 L a year.`);
+ if(amt('sfb')>5e5*4){const nb=Math.ceil(amt('sfb')/5e5);w.push(`Small finance bank FDs: ${inr(amt('sfb'))} would need ${nb>10?'more than 10':nb} banks to stay within ₹5 L DICGC cover each${nb>10?', which is not practical':''}.`);}
+ if(R.annFrac>0)w.push(`The annuity pension stays flat at ${inrFull(P.ann/12)}/month for life; inflation erodes it every year.`);
+ $('capWarn').hidden=!w.length;$('capWarn').innerHTML=w.map(t=>`<p>${t}</p>`).join('');
+}
+
+function drawAvenues(P,mineMC){
+ const swing=sd=>{const p=sd*100;const lab=p<1.5?'Very low':p<5?'Low':p<10?'Medium':p<14?'High':'Very high';return `<span class="swing">${lab} ±${p.toFixed(p<1.5?1:0)}%<b style="width:${Math.max(3,Math.min(48,p*2.6))}px"></b></span>`;};
+ const res=(r,ann)=>{const med=pct(r.deps.map(dA),.5),ok=r.ok;const cls=ok>=.85?'good':ok>=.6?'warn':'bad';
+  const t=med>100?(ann?'Covers past 100':'Past 100'):(ann?'Falls short at '+Math.floor(med):Math.floor(med));
+  return `<td>${t}</td><td><span class="tag ${cls}">${cls==='good'?'✓':cls==='warn'?'!':'✕'} ${Math.round(ok*100)}%</span></td>`;};
+ const cp=caps();
+ const key=JSON.stringify([S.exp,S.infl,S.slab,S.hh,S.curAge,S.retAge,S.planAge,S.preR,S.retTxt,S.todayTxt,S.EQ,S.GD,S.pension,S.pensionG,S.flex]);
+ let h=`<thead><tr><th>Avenue</th><th>Return before tax</th><th>After tax</th><th>Ups and downs</th><th>Typical: lasts to</th><th>Chance to ${S.planAge}</th></tr></thead><tbody>`;
+ h+=`<tr class="mine"><td>Your current mix<span class="note">${PLANS.find(p=>p.id===S.plan).label}</span></td><td>${P.R.annFrac>=1?'—':(P.R.preM*100).toFixed(1)+'%'}</td><td>${P.R.annFrac>=1?'—':(P.R.M*100).toFixed(1)+'%'}</td><td>${swing(P.R.sd)}</td>${res(mineMC)}</tr>`;
+ if(avCache.key!==key){let b='';
+ AVG.forEach(gr=>{
+  b+=`<tr class="gh"><td colspan="6"><i style="background:${gr.c}"></i>${gr.name}</td></tr>`;
+  AV.filter(a=>a.g===gr.id).forEach(a=>{
+   const Pa=params(1,null,{[a.id]:100});const r=monte(Pa,200,false);
+   let pre,post,lim='';
+   if(a.ann){pre=annRate(a)*100;post=pre*(1-taxFrac(a));}else{pre=avPre(a,{e:0,g:0});post=Pa.R.M*100;}
+   if(a.cap==='scss'&&P.C>cp.scss)lim='<span class="tag warn">Above limit</span> ';
+   if(a.cap==='pomis'&&P.C>cp.pomis)lim='<span class="tag warn">Above limit</span> ';
+   if(a.cap==='ppf')lim='<span class="tag warn">Existing balance only</span> ';
+   const annTxt=a.ann?` Pays ${inrFull(P.C*annRate(a)*(1-taxFrac(a))/12)}/month after tax on your corpus.`:'';
+   b+=`<tr><td><span class="nm">${a.name}</span><span class="note">${lim}${a.note}${annTxt}</span></td><td>${pre.toFixed(1)}%</td><td>${post.toFixed(1)}%</td><td>${a.ann?'<span class="swing">None, but flat</span>':swing(Pa.R.sd)}</td>${res(r,!!a.ann)}</tr>`;
+  });
+ });
+ avCache={key,html:b};}
+ $('avTable').innerHTML=h+avCache.html+'</tbody>';
+}
+let avCache={key:null,html:''};
+
+function drawScen(){
+ const modes=[['govt','Official CPI','~5% on everything'],['real','Realistic','Health 11%'],['stress','Stress','Everything +1.5%']];
+ let h='<tr><th></th>'+Object.values(RETS).map(r=>`<th>${r.label}<span class="s">${r.s}</span></th>`).join('')+'</tr>';
+ modes.forEach(([m,l,s])=>{
+  h+=`<tr><th>${l}<span class="s">${s}</span></th>`;
+  Object.entries(RETS).forEach(([rk,r])=>{
+   const a=dA(run(params(1,PRESETS[m],S.mix,r),null,false).dep);
+   const cls=(a>100||a>=S.planAge+5)?'good':a>=S.planAge+1?'warn':'bad';
+   const msg=cls==='good'?'✓ Comfortable':cls==='warn'?'! Just enough':`✕ Short ${Math.max(1,S.planAge-Math.floor(a))} yrs`;
+   const mine=S.inflMode===m&&rk==='base';
+   h+=`<td class="${cls}${mine?' mine':''}"><b>${a>100?'Past 100':'Age '+Math.floor(a)}</b><small>${msg}</small></td>`;
+  });
+  h+='</tr>';
+ });
+ $('scen').innerHTML=h;
+}
+
+function drawSpend(P){
+ const ages=[S.retAge,75,85].filter((a,i,arr)=>(a>S.retAge||(a===S.retAge&&P.yrs>0))&&a<=100&&arr.indexOf(a)===i);
+ if(!ages.length)ages.push(Math.min(100,S.retAge+10));
+ const at=(g,age)=>P.exp[g]*Math.pow(1+P.inf[g],age-S.retAge)/12;
+ let h='<tr><th>Category</th><th>Today</th>'+ages.map(a=>`<th>At ${a}</th>`).join('')+'</tr>';
+ const tot={today:0};ages.forEach(a=>tot[a]=0);
+ GROUPS.forEach(g=>{const t=annualToday(g.id)/12;tot.today+=t;
+  h+=`<tr><td>${g.name}</td><td>${inr(t)}</td>`+ages.map(a=>{const v=at(g.id,a);tot[a]+=v;return `<td>${inr(v)}</td>`;}).join('')+'</tr>';});
+ h+=`<tr class="sum"><td>Total</td><td>${inr(tot.today)}</td>`+ages.map(a=>`<td>${inr(tot[a])}</td>`).join('')+'</tr>';
+ $('spendTable').innerHTML=h;
+ const last=ages[ages.length-1];
+ $('healthNote').textContent=tot.today?`Health is ${(annualToday('health')/12/tot.today*100).toFixed(0)}% of your spending today and becomes ${(at('health',last)/tot[last]*100).toFixed(0)}% by age ${last}.`:'';
+}
+
+function drawBuckets(P,need1){
+ const C=P.corpus,b1=Math.min(C,3*need1),b2=Math.min(C-b1,5*need1),b3=Math.max(0,C-b1-b2);
+ const p=v=>C?Math.round(v/C*100):0;
+ const items=[
+  ['Spending','1–3 years',b1,'Liquid or arbitrage fund, sweep FD. Your monthly withdrawal comes only from here.','var(--c1)'],
+  ['Stability','Years 4–8',b2,'SCSS, POMIS, RBI floating rate bonds, short-duration debt or a conservative hybrid fund. Refills bucket 1.','var(--c3)'],
+  ['Growth','Year 9 onward',b3,'Index, flexi-cap or multi-asset fund. Leave it 7+ years. Move gains down only in good years.','var(--c4)']];
+ $('bucketBar').innerHTML=items.map(i=>`<span style="flex:${Math.max(i[2],1e-4)};background:${i[4]}"></span>`).join('');
+ $('buckets').innerHTML=items.map(i=>`<div class="bucket"><h3>${i[0]} · ${i[1]}</h3><span class="amt">${inr(i[2])}</span><span class="hint">${p(i[2])}% of invested money</span><span class="what">${i[3]}</span></div>`).join('');
+ const mine=Math.round((P.R.eq+P.R.gold)*100);
+ $('bucketNote').textContent=C<=0?'All your money is in an annuity, so there is nothing to bucket.':b3<=0?'Your invested money covers less than 8 years of withdrawals, so nothing is left for growth. Spend less, retire later, or add income before relying on this plan.':
+  `This plan has about ${p(b3)}% in growth assets. Your current mix has ${mine}% in equity and gold${Math.abs(mine-p(b3))>15?', so the two differ a lot; consider the “Three buckets” plan':''}.`;
+}
+
+/* ---------- chart ---------- */
+function niceStep(raw){const p=Math.pow(10,Math.floor(Math.log10(raw)));const f=raw/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p;}
+function drawChart(P,mc,det){
+ const svg=$('chart'),box=$('chartBox');const W=Math.max(300,box.clientWidth),H=300,m={l:58,r:14,t:14,b:30};
+ svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+ const n=100-S.retAge+1,defl=y=>S.view==='real'?Math.pow(1+P.inf.ess,P.yrs+y):1;
+ const p10=[],p50=[],p90=[];
+ for(let y=0;y<n;y++){const col=mc.paths.map(p=>p[y]/defl(y));p10.push(pct(col,.1));p50.push(pct(col,.5));p90.push(pct(col,.9));}
+ const ymaxRaw=Math.max(...p90.slice(0,Math.min(n,S.planAge-S.retAge+6)),P.corpus/defl(0),1)*1.05;
+ const step=niceStep(ymaxRaw/4),ymax=Math.ceil(ymaxRaw/step)*step,x0=S.retAge,x1=100;
+ const X=a=>m.l+(a-x0)/(x1-x0)*(W-m.l-m.r),Y=v=>m.t+(1-Math.min(v,ymax)/ymax)*(H-m.t-m.b);
+ let s='';
+ for(let v=0;v<=ymax+1;v+=step)s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${m.l-8}" y="${Y(v)+4}" text-anchor="end">${v===0?'0':inrAxis(v)}</text>`;
+ for(let a=Math.ceil(x0/5)*5;a<=x1;a+=5)s+=`<text x="${X(a)}" y="${H-10}" text-anchor="middle">${a}</text>`;
+ s+=`<line x1="${X(S.planAge)}" x2="${X(S.planAge)}" y1="${m.t}" y2="${H-m.b}" stroke="var(--muted)" stroke-dasharray="4 4"/><text x="${X(S.planAge)+5}" y="${m.t+12}">Plan to ${S.planAge}</text>`;
+ let band='M';for(let y=0;y<n;y++)band+=`${X(x0+y)},${Y(p90[y])} L`;for(let y=n-1;y>=0;y--)band+=`${X(x0+y)},${Y(p10[y])}${y?' L':''}`;
+ s+=`<path d="${band} Z" fill="var(--band)" stroke="none"/>`;
+ s+=`<path d="M${p50.map((v,y)=>`${X(x0+y)},${Y(v)}`).join(' L')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
+ s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)" stroke-width="1"/>`;
+ s+=`<g id="hover" style="display:none"><line id="hl" y1="${m.t}" y2="${H-m.b}" stroke="var(--ink)" stroke-width="1" opacity=".4"/><circle id="hc" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/></g>`;
+ s+=`<rect x="${m.l}" y="${m.t}" width="${W-m.l-m.r}" height="${H-m.t-m.b}" fill="transparent" id="hit"/>`;
+ svg.innerHTML=s;
+ const tip=$('tip'),hit=$('hit'),hg=$('hover');
+ const move=e=>{const r=svg.getBoundingClientRect(),px=(e.clientX-r.left)*W/r.width;
+  const y=Math.max(0,Math.min(n-1,Math.round((px-m.l)/(W-m.l-m.r)*(x1-x0)))),ax=X(x0+y);
+  hg.style.display='';$('hl').setAttribute('x1',ax);$('hl').setAttribute('x2',ax);$('hc').setAttribute('cx',ax);$('hc').setAttribute('cy',Y(p50[y]));
+  tip.hidden=false;tip.innerHTML=`<div class="t">Age ${x0+y}</div><div><span>Typical</span>${inr(p50[y])}</div><div><span>Bad market</span>${inr(p10[y])}</div><div><span>Good market</span>${inr(p90[y])}</div><div><span>Spending/month</span>${inr(det.spend[y]/defl(y)/12)}</div>`;
+  const tx=ax*r.width/W;let left=tx+12;if(left+tip.offsetWidth>r.width)left=Math.max(4,tx-tip.offsetWidth-12);tip.style.left=left+'px';tip.style.top='10px';};
+ hit.addEventListener('pointermove',move);hit.addEventListener('pointerdown',move);
+ hit.addEventListener('pointerleave',()=>{tip.hidden=true;hg.style.display='none';});
+}
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(lastMC&&lastP&&lastP.C)drawChart(lastP,lastMC,lastDet);},120);});
+$('dock').addEventListener('click',()=>$('verdict').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}));
+let ut;const _u=update;update=function(){clearTimeout(ut);ut=setTimeout(_u,60);};
+_u();
+})();
+</script>
+
+</body></html>
